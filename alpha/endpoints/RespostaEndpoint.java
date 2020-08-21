@@ -1,10 +1,7 @@
 package com.alpha.endpoints;
 
 import com.alpha.models.*;
-import com.alpha.repositories.AlunoRepository;
-import com.alpha.repositories.ProvaRepository;
-import com.alpha.repositories.QuestaoRepository;
-import com.alpha.repositories.RespostaRepository;
+import com.alpha.repositories.*;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
@@ -32,29 +29,25 @@ public class RespostaEndpoint {
     private final RespostaRepository respostaDAO;
     private final ProvaRepository provaDAO;
     private final AlunoRepository alunoDAO;
-    private final QuestaoRepository questaoDAO;
+
     @Autowired
     private Disco disco;
     private String caminho;
 
     @Autowired
-    public RespostaEndpoint(RespostaRepository respostaDAO, ProvaRepository provaDAO, AlunoRepository alunoDAO, QuestaoRepository questaoDAO) {
+    public RespostaEndpoint(RespostaRepository respostaDAO, ProvaRepository provaDAO, AlunoRepository alunoDAO, QuestaoRepository questaoDAO, DisciplinaRepository disciplinaDAO, EscolaRepository escolaDAO, NotaDisciplinaRepository notaDisciplinaDAO, AlunoProvaRepository alunoProvaDAO) {
         this.respostaDAO = respostaDAO;
         this.provaDAO = provaDAO;
         this.alunoDAO = alunoDAO;
-        this.questaoDAO = questaoDAO;
     }
 
     private String fileName = this.caminho;
 
-
     @GetMapping
-    public ResponseEntity<?> getRespostas(@PathVariable("id") Long id, @PathVariable("idp") Long idp){
-
+    public ResponseEntity<?> getRespostas(@PathVariable("id") Long id, @PathVariable("idp") Long idp) {
         Prova prova = provaDAO.findById(idp).get();
         Iterable<Resposta> respostas = respostaDAO.findByProva(prova);
         return new ResponseEntity<>(respostas, HttpStatus.OK);
-
     }
 
     @PostMapping(path = "/upload")
@@ -63,9 +56,7 @@ public class RespostaEndpoint {
         disco.salvarRespostas(respostas);
         this.fileName = disco.caminho;
         System.out.println(this.fileName);
-
     }
-
 
     @PostMapping(path = "/import")
     public void importarRespostas(@PathVariable("id") Long id, @PathVariable("idp") Long idp) {
@@ -74,89 +65,45 @@ public class RespostaEndpoint {
         Aluno aluno = new Aluno();
         try {
             FileInputStream arquivo = new FileInputStream(new File(fileName));
-
             HSSFWorkbook workbook = new HSSFWorkbook(arquivo);
             HSSFSheet sheetRespostas = workbook.getSheetAt(0);
             HSSFRow header_row = sheetRespostas.getRow(0);
-
+            int linhas = sheetRespostas.getPhysicalNumberOfRows();
+            int colunas = sheetRespostas.getRow(0).getPhysicalNumberOfCells();
+            System.out.println(colunas + " colunas");
+            System.out.println(linhas + " linhas");
             Iterator<Row> rowIterator = sheetRespostas.iterator();
-
             rowIterator.next(); //pula a primeira linha(título da coluna)
 
             while (rowIterator.hasNext()) {
                 Row row = rowIterator.next();
                 Iterator<Cell> cellIterator = row.cellIterator();
-
-
-
+                int i = 0;
                 while (cellIterator.hasNext()) {
-                    for (int i = 0; i < 6; i++) {
-                        DataFormatter formatter = new DataFormatter(); //creating formatter using the default locale
-                        HSSFCell header_cell = header_row.getCell(i);
-                        String header = header_cell.getStringCellValue();
-                        Cell cell = cellIterator.next();
-                        Resposta resposta = new Resposta();
-                        resposta.setProva(prova);
+                    DataFormatter formatter = new DataFormatter();
+                    HSSFCell header_cell = header_row.getCell(i);
+                    String header = header_cell.getStringCellValue();
+                    Cell cell = cellIterator.next();
+                    Resposta resposta = new Resposta();
+                    resposta.setProva(prova);
+                    resposta.setNota((float) 0);
 
+                    System.out.print(header + ": " + cell + " | ");
 
-
-                        switch (String.valueOf(header_cell)) {
-
-                            case "ID":
-                                aluno = alunoDAO.findById(Long.valueOf(formatter.formatCellValue(cell))).get();
-
-                                break;
-
-                            case "Q1":
-                                resposta.setQuestao(1);
-                                resposta.setAluno(aluno);
-                                resposta.setNr(1);
-                                resposta.setResposta(formatter.formatCellValue(cell));
-                                listaRespostas.add(resposta);
-                                break;
-
-                            case "Q2":
-                                resposta.setQuestao(2);
-                                resposta.setAluno(aluno);
-                                resposta.setNr(2);
-                                resposta.setResposta(formatter.formatCellValue(cell));
-                                listaRespostas.add(resposta);
-                                break;
-
-                            case "Q3":
-                                resposta.setQuestao(3);
-                                resposta.setAluno(aluno);
-                                resposta.setNr(3);
-                                resposta.setResposta(formatter.formatCellValue(cell));
-                                listaRespostas.add(resposta);
-                                break;
-
-                            case "Q4":
-                                resposta.setQuestao(4);
-                                resposta.setAluno(aluno);
-                                resposta.setNr(4);
-                                resposta.setResposta(formatter.formatCellValue(cell));
-                                listaRespostas.add(resposta);
-                                break;
-
-                            case "Q5":
-                                resposta.setQuestao(5);
-                                resposta.setAluno(aluno);
-                                resposta.setNr(5);
-                                resposta.setResposta(formatter.formatCellValue(cell));
-                                listaRespostas.add(resposta);
-                                break;
-
-                            default:
-                                System.out.println("ërro");
-
-
+                    for (int n = 1; n < colunas; n++) {
+                        String q = "Q" + n;
+                        if (header.equalsIgnoreCase("ID")) {
+                            aluno = alunoDAO.findById(Long.valueOf(formatter.formatCellValue(cell))).get();
                         }
-
+                        if (header.equalsIgnoreCase(q)) {
+                            resposta.setAluno(aluno);
+                            resposta.setNr(n);
+                            resposta.setResposta(formatter.formatCellValue(cell));
+                            listaRespostas.add(resposta);
+                        }
                     }
+                    i++;
                 }
-
-
             }
             arquivo.close();
 
@@ -169,7 +116,6 @@ public class RespostaEndpoint {
             System.out.println("Nenhuma resposta encontrada!");
         } else {
             for (Resposta resposta : listaRespostas) {
-                System.out.println(resposta.getResposta());
                 respostaDAO.save(resposta);
             }
             System.out.println(listaRespostas.size());

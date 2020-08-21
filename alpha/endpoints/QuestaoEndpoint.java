@@ -1,16 +1,16 @@
 package com.alpha.endpoints;
 
 
+import com.alpha.models.Disciplina;
 import com.alpha.models.Prova;
 import com.alpha.models.Questao;
-import com.alpha.repositories.EscolaRepository;
-import com.alpha.repositories.ProvaRepository;
-import com.alpha.repositories.QuestaoRepository;
+import com.alpha.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @CrossOrigin
@@ -21,11 +21,16 @@ public class QuestaoEndpoint {
     private final QuestaoRepository questaoDAO;
     private final EscolaRepository escolaDAO;
     private final ProvaRepository provaDAO;
+    private final AlunoRepository alunoDAO;
+    private final DisciplinaRepository disciplinaDAO;
+
     @Autowired
-    public QuestaoEndpoint(QuestaoRepository questaoDAO, EscolaRepository escolaDAO, ProvaRepository provaDAO) {
+    public QuestaoEndpoint(QuestaoRepository questaoDAO, EscolaRepository escolaDAO, ProvaRepository provaDAO, AlunoRepository alunoDAO, DisciplinaRepository disciplinaDAO) {
         this.questaoDAO = questaoDAO;
         this.escolaDAO = escolaDAO;
         this.provaDAO = provaDAO;
+        this.alunoDAO = alunoDAO;
+        this.disciplinaDAO = disciplinaDAO;
     }
 
     @GetMapping
@@ -33,9 +38,24 @@ public class QuestaoEndpoint {
 
         Prova prova = provaDAO.findById(idp).get();
         Iterable<Questao> questoes = questaoDAO.findByProva(prova);
+        //List<Questao> questions = (List<Questao>) questoes;
+        //System.out.println(questions.size());
+        //List<Disciplina> disciplinas = new ArrayList<Disciplina>();
         return new ResponseEntity<>(questoes, HttpStatus.OK);
 
     }
+
+    @GetMapping(path = "/{idd}/disciplina")
+    public ResponseEntity<?> getQuestoesDisciplina(@PathVariable("id") Long id, @PathVariable("idp") Long idp, @PathVariable("idd") Long idd){
+
+        Prova prova = provaDAO.findById(idp).get();
+        Disciplina disciplina = disciplinaDAO.findById(idd).get();
+        Iterable<Questao> questoes = questaoDAO.findByProvaAndDisciplina(prova , disciplina);
+        return new ResponseEntity<>(questoes, HttpStatus.OK);
+
+    }
+
+
 
     @PutMapping
     public ResponseEntity<?> salvar(@PathVariable("id") Long id, @PathVariable("idp") Long idp, @RequestBody List<Questao> questoes){

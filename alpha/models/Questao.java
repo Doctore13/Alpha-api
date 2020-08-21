@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -25,6 +26,9 @@ public class Questao implements Serializable {
     @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "disciplina")
     private Disciplina disciplina;
+
+    @OneToMany(mappedBy = "questao", targetEntity = Resposta.class, cascade = CascadeType.ALL)
+    private List<Resposta> respostas;
 
     public Long getId() {
         return id;
@@ -65,7 +69,7 @@ public class Questao implements Serializable {
     public void setGabarito(String gabarito) {
         this.gabarito = gabarito;
     }
-
+    @JsonIgnore
     public Prova getProva() {
         return prova;
     }
@@ -88,6 +92,14 @@ public class Questao implements Serializable {
 
     public void setTipo(String tipo) {
         this.tipo = tipo;
+    }
+    @JsonIgnore
+    public List<Resposta> getRespostas() {
+        return respostas;
+    }
+
+    public void setRespostas(List<Resposta> respostas) {
+        this.respostas = respostas;
     }
 
     @Override

@@ -1,5 +1,7 @@
 package com.alpha.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Objects;
@@ -12,8 +14,15 @@ public class Resposta implements Serializable {
     private Long id;
     private Integer nr;
     private String resposta;
-    private Integer questao;
+    private Float nota;
 
+    @ManyToOne
+    @JoinColumn(name = "questao")
+    private Questao questao;
+
+    @ManyToOne
+    @JoinColumn(name = "disciplina")
+    private Disciplina disciplina;
 
     @ManyToOne
     @JoinColumn(name = "aluno")
@@ -47,12 +56,20 @@ public class Resposta implements Serializable {
         this.resposta = resposta;
     }
 
-    public Integer getQuestao() {
+    public Questao getQuestao() {
         return questao;
     }
 
-    public void setQuestao(Integer questao) {
+    public void setQuestao(Questao questao) {
         this.questao = questao;
+    }
+    @JsonIgnore
+    public Disciplina getDisciplina() {
+        return disciplina;
+    }
+
+    public void setDisciplina(Disciplina disciplina) {
+        this.disciplina = disciplina;
     }
 
     public Aluno getAluno() {
@@ -62,7 +79,7 @@ public class Resposta implements Serializable {
     public void setAluno(Aluno aluno) {
         this.aluno = aluno;
     }
-
+    @JsonIgnore
     public Prova getProva() {
         return prova;
     }
@@ -70,6 +87,16 @@ public class Resposta implements Serializable {
     public void setProva(Prova prova) {
         this.prova = prova;
     }
+
+    public Float getNota() {
+        return nota;
+    }
+
+    public void setNota(Float nota) {
+        this.nota = nota;
+    }
+
+
 
     @Override
     public boolean equals(Object o) {

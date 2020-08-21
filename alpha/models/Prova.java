@@ -33,6 +33,13 @@ public class Prova implements Serializable {
     @OneToMany(mappedBy = "prova", targetEntity = Resposta.class, cascade = CascadeType.ALL)
     private List<Resposta> respostas;
 
+    @OneToMany(mappedBy = "prova", targetEntity = AlunoProva.class, cascade = CascadeType.ALL)
+    private List<AlunoProva> alunoProvas;
+
+    @OneToMany(mappedBy = "prova", targetEntity = NotaDisciplina.class, cascade = CascadeType.ALL)
+    private List<NotaDisciplina> notasDisciplina;
+
+
     public Long getId() {
         return id;
     }
@@ -111,6 +118,22 @@ public class Prova implements Serializable {
     @JsonIgnore
     public void setRespostas(List<Resposta> respostas) {
         this.respostas = respostas;
+    }
+
+    public List<AlunoProva> getAlunoProvas() {
+        return alunoProvas;
+    }
+
+    public void setAlunoProvas(List<AlunoProva> alunoProvas) {
+        this.alunoProvas = alunoProvas;
+    }
+    @JsonIgnore
+    public List<NotaDisciplina> getNotasDisciplina() {
+        return notasDisciplina;
+    }
+
+    public void setNotasDisciplina(List<NotaDisciplina> notasDisciplina) {
+        this.notasDisciplina = notasDisciplina;
     }
 
     @Override

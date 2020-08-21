@@ -32,6 +32,9 @@ public class Aluno implements Serializable {
     @OneToMany(mappedBy = "aluno", targetEntity = Resposta.class)
     private List<Resposta> respostas;
 
+    @OneToMany(mappedBy = "aluno", targetEntity = AlunoProva.class, cascade = CascadeType.ALL)
+    private List<AlunoProva> alunoProvas;
+
     public Long getId() {
         return id;
     }
@@ -93,6 +96,14 @@ public class Aluno implements Serializable {
 
     public void setSala(String sala) {
         this.sala = sala;
+    }
+    @JsonIgnore
+    public List<AlunoProva> getAlunoProvas() {
+        return alunoProvas;
+    }
+
+    public void setAlunoProvas(List<AlunoProva> alunoProvas) {
+        this.alunoProvas = alunoProvas;
     }
 
     @Override

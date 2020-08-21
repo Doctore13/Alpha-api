@@ -23,6 +23,12 @@ public class Disciplina implements Serializable {
     @OneToMany(mappedBy = "disciplina", targetEntity = Questao.class, cascade = CascadeType.ALL)
     private List<Questao> questoes;
 
+    @OneToMany(mappedBy = "disciplina", targetEntity = Resposta.class, cascade = CascadeType.ALL)
+    private List<Resposta> respostas;
+
+    @OneToMany(mappedBy = "disciplina", targetEntity = NotaDisciplina.class, cascade = CascadeType.ALL)
+    private List<NotaDisciplina> notasDisciplina;
+
     public Long getId() {
         return id;
     }
@@ -61,6 +67,22 @@ public class Disciplina implements Serializable {
 
     public void setQuestoes(List<Questao> questoes) {
         this.questoes = questoes;
+    }
+    @JsonIgnore
+    public List<Resposta> getRespostas() {
+        return respostas;
+    }
+
+    public void setRespostas(List<Resposta> respostas) {
+        this.respostas = respostas;
+    }
+    @JsonIgnore
+    public List<NotaDisciplina> getNotasDisciplina() {
+        return notasDisciplina;
+    }
+
+    public void setNotasDisciplina(List<NotaDisciplina> notasDisciplina) {
+        this.notasDisciplina = notasDisciplina;
     }
 
     @Override
